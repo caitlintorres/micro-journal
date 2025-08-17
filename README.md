@@ -1,4 +1,4 @@
-# Recipe Reviews App
+# Micro Journal App
 
 Log one sentence a day with mood tracking. Built with Next.js, Tailwind CSS, React Select, and Supabase.
 
