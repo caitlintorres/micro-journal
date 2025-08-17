@@ -45,8 +45,8 @@ Log one sentence a day with mood tracking. Built with Next.js, Tailwind CSS, Rea
 - Create a table called `moods` with columns:  
   - `id` (bigint, auto-increment, primary key)  
   - `time` (timestamp, default now())  
-  - `category` (integer)  
-  - `description` (text array)  
+  - `category` (text)  
+  - `description` (text)  
   - `created_at` (timestamp, default now())  
 
 ### Supabase Client (lib/supabaseClient.js)
