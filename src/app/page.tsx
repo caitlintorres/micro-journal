@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { Trash2 } from "lucide-react";
-
-type Mood = {
-  id: number;
-  time: string;
-  category: string;
-  description: string;
-  created_at: string;
-};
 
 const CATEGORIES = [
   "Happy",
@@ -36,27 +28,7 @@ export default function MicroJournal() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [description, setDescription] = useState("");
   const [time, setTime] = useState(toDatetimeLocal(new Date())); // default to now in local timezone
-
-  const [entries, setEntries] = useState<Mood[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // For modal
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  // Fetch moods
-  useEffect(() => {
-    const fetchMoods = async () => {
-      const { data, error } = await supabase
-        .from("moods")
-        .select("*")
-        .order("time", { ascending: false });
-
-      if (error) console.error("Error fetching moods:", error);
-      else setEntries(data || []);
-    };
-    fetchMoods();
-  }, []);
 
   // Add mood
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +44,6 @@ export default function MicroJournal() {
   
     if (error) console.error("Error inserting mood:", error);
     else if (data) {
-      setEntries((prev) => [...data, ...prev]);
       setCategory(CATEGORIES[0]);
       setDescription("");
       setTime(toDatetimeLocal(new Date())); // reset to now local
@@ -81,25 +52,14 @@ export default function MicroJournal() {
     setLoading(false);
   };
 
-  // Confirm delete
-  const confirmDelete = async () => {
-    if (!deleteId) return;
-    setDeleting(true);
-
-    const { error } = await supabase.from("moods").delete().eq("id", deleteId);
-
-    if (error) {
-      console.error("Error deleting mood:", error);
-    } else {
-      setEntries((prev) => prev.filter((entry) => entry.id !== deleteId));
-    }
-
-    setDeleting(false);
-    setDeleteId(null);
-  };
-
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-6">
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <div className="space-y-4">
+        <Link href="/entries">
+        <button className="px-4 py-2 rounded border hover:bg-gray-100">
+          View Past Entries
+        </button>
+      </Link></div>
       {/* Entry Form */}
       <form
         onSubmit={handleSubmit}
@@ -145,70 +105,6 @@ export default function MicroJournal() {
           {loading ? "Saving..." : "Save Entry"}
         </button>
       </form>
-
-      {/* History */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-white-900">Past Entries</h3>
-        {entries.length === 0 ? (
-          <p className="text-gray-600">No entries yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {entries.map((entry) => (
-              <li
-                key={entry.id}
-                className="flex justify-between items-start border rounded p-3 bg-gray-50 shadow-sm"
-              >
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {entry.category}
-                  </p>
-                  <p className="text-sm text-gray-900">{entry.description}</p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {new Date(entry.time).toLocaleString()}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setDeleteId(entry.id)}
-                  className="text-red-500 hover:text-red-700 p-1"
-                  title="Delete entry"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Confirmation Modal */}
-      {deleteId && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-80 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Delete Entry?
-            </h2>
-            <p className="text-sm text-gray-700">
-              Are you sure you want to delete this mood entry? This action
-              cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                disabled={deleting}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
