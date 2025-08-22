@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { MOOD_EMOJIS } from "./entries/page";
 
 const CATEGORIES = [
   "Happy",
@@ -23,6 +24,7 @@ const toDatetimeLocal = (date: Date) => {
   const minutes = pad(date.getMinutes());
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
+
 
 export default function MicroJournal() {
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -56,7 +58,7 @@ export default function MicroJournal() {
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <div className="space-y-4">
         <Link href="/entries">
-        <button className="px-4 py-2 rounded border hover:bg-gray-100">
+        <button className="px-4 py-2 rounded border hover:bg-blue-600">
           View Past Entries
         </button>
       </Link></div>
@@ -75,7 +77,7 @@ export default function MicroJournal() {
         >
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
-              {cat}
+              {MOOD_EMOJIS[cat] || "❓"} {cat}
             </option>
           ))}
         </select>
